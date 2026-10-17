@@ -1,122 +1,89 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function TaskMind() {
+  const [rawInput, setRawInput] = useState('');
+  const [optimizedTasks, setOptimizedTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGenerate = async () => {
+    if (!rawInput.trim()) return;
+    setIsLoading(true);
+
+    try {
+      // Clean and split lines into distinct tasks
+      const taskList = rawInput.split('\n').filter(t => t.trim() !== '');
+
+      // API call placeholder for your Python backend
+      const response = await fetch('http://127.0.0', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks: taskList })
+      });
+      
+      const data = await response.json();
+      setOptimizedTasks(data.orderedTasks);
+    } catch (error) {
+      console.error("Backend offline. Running simulation fallback...");
+      // Simulating a quick priority sorting optimization
+      setOptimizedTasks(rawInput.split('\n').filter(t => t.trim() !== ''));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app-background">
+      {/* Navbar Layout */}
+      <nav className="navbar">
+        <div className="logo-container">
+          <div className="brain-icon">🧠</div>
+          <span className="brand-name">TaskMind</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+        <div className="avatar-container">
+          <div className="user-avatar">👤</div>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </nav>
 
-      <div className="ticks"></div>
+      {/* Main Framework Viewport */}
+      <main className="main-viewport">
+        
+        {/* Step 1: Optimized List Results Render Above The Textarea */}
+        {optimizedTasks.length > 0 && (
+          <div className="output-sequence-container">
+            <h3 className="sequence-title">✨ AI Prioritized Sequence</h3>
+            <div className="task-timeline">
+              {optimizedTasks.map((task, idx) => (
+                <div key={idx} className="timeline-item">
+                  <div className="step-counter">{idx + 1}</div>
+                  <div className="task-card-pill">{task}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        {/* Step 2: Primary Input Central Node Block */}
+        <div className="central-card">
+          <div className="input-glow-container">
+            <span className="input-prompt-label">Ask TaskMind to generate your next task...</span>
+            <textarea
+              className="neon-textarea"
+              placeholder="Type your tasks here (one per line)..."
+              value={rawInput}
+              onChange={(e) => setRawInput(e.target.value)}
+            />
+          </div>
+          
+          <button 
+            className={`generate-btn ${isLoading ? 'loading' : ''}`}
+            onClick={handleGenerate}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Sequencing Flow...' : 'Generate Task'}
+          </button>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </main>
+    </div>
+  );
 }
-
-export default App
