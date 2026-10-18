@@ -148,6 +148,14 @@
   gap: 12px;
 }
 
+.optimization-reason {
+  margin: 18px 0 0 44px;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+
 .timeline-item {
   display: flex;
   align-items: center;

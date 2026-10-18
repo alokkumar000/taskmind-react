@@ -4,6 +4,7 @@ import './App.css';
 export default function TaskMind() {
   const [rawInput, setRawInput] = useState('');
   const [optimizedTasks, setOptimizedTasks] = useState([]);
+  const [optimizationReason, setOptimizationReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerate = async () => {
@@ -15,7 +16,7 @@ export default function TaskMind() {
       const taskList = rawInput.split('\n').filter(t => t.trim() !== '');
 
       // API call placeholder for your Python backend
-      const response = await fetch('http://127.0.0', {
+      const response = await fetch('https://taskmind-python.fastapicloud.dev/api/optimize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tasks: taskList })
@@ -23,10 +24,12 @@ export default function TaskMind() {
       
       const data = await response.json();
       setOptimizedTasks(data.orderedTasks);
+      setOptimizationReason(data.reason || '');
     } catch (error) {
       console.error("Backend offline. Running simulation fallback...");
       // Simulating a quick priority sorting optimization
       setOptimizedTasks(rawInput.split('\n').filter(t => t.trim() !== ''));
+      setOptimizationReason('');
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +63,9 @@ export default function TaskMind() {
                 </div>
               ))}
             </div>
+            {optimizationReason && (
+              <p className="optimization-reason">{optimizationReason}</p>
+            )}
           </div>
         )}
 
